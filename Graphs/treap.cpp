@@ -22,6 +22,17 @@ const int iINF = 0x3f3f3f3f;
 struct TreapNode {
   int key_, prio_;
   TreapNode *l_ = nullptr, *r_ = nullptr;
+  friend size_t size(TreapNode *v) { return v->size_; };
+  friend void update(TreapNode *v) {
+    v->size_ = 0;
+    if (v->l_ != nullptr)
+      v->size_ += size(v->l_);
+    if (v->r_ != nullptr)
+      v->size_ += size(v->r_);
+  }
+
+private:
+  size_t size_ = 0;
 };
 
 pair<TreapNode *, TreapNode *> split(TreapNode *cur_node, int key) {
@@ -42,6 +53,20 @@ pair<TreapNode *, TreapNode *> split(TreapNode *cur_node, int key) {
     } else {
       return make_pair(nullptr, cur_node);
     }
+  }
+}
+
+pair<TreapNode *, TreapNode *> split_size(TreapNode *cur_node, int k) {
+  if (1 + size(cur_node->l_) <= k) {
+    auto [rl, rr] = split_size(cur_node->r_, k - 1 - size(cur_node->l_));
+    cur_node->r_ = rl;
+    update(cur_node);
+    return make_pair(cur_node, rr);
+  } else {
+    auto [ll, lr] = split_size(cur_node->l_, k);
+    cur_node->l_ = lr;
+    update(cur_node);
+    return make_pair(ll, cur_node);
   }
 }
 
